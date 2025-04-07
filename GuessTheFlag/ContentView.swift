@@ -13,14 +13,18 @@ struct ContentView: View {
     
     @State private var showingScore = false
     @State private var scoreTitle = ""
+    @State private var score: Int = 0
+    @State private var questionsAsked: Int = 0
+    private var questionLimit: Int = 8
+    @State private var showingFinalScore: Bool = false
     
     var body: some View {
         ZStack {
             RadialGradient(stops: [
                 .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
                 .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3)],
-                center: .top, startRadius: 200, endRadius: 700)
-                .ignoresSafeArea()
+                           center: .top, startRadius: 200, endRadius: 700)
+            .ignoresSafeArea()
             
             VStack {
                 Spacer()
@@ -57,7 +61,7 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
                 
-                Text("Score: ???")
+                Text("Score: \(score)")
                     .foregroundStyle(.white)
                     .font(.title.bold())
                 
@@ -65,24 +69,41 @@ struct ContentView: View {
             }
             .padding()
         }
+        // Current Score Alert
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: askQuestion)
         } message: {
-            Text("Your score is ???")
+            Text("Your score is \(score)")
+        }
+        // Game Over Alert
+        .alert("Game Over", isPresented: $showingFinalScore) {
+            Button("Restart game", action: restartGame)
+        } message: {
+            Text("Your final score is \(score) out of \(questionLimit)")
         }
     }
     
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct!"
+            score += 1
         } else {
-            scoreTitle = "Wrong!"
+            scoreTitle = "Wrong! Thats the flag of \(countries[number])"
         }
         
-        showingScore = true
+        questionsAsked += 1
+        
+        if questionsAsked == 8 {
+            showingFinalScore = true
+        } else {
+            showingScore = true
+        }
     }
     
     func askQuestion() {
+        if showingFinalScore {
+            return
+        }
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
@@ -90,8 +111,15 @@ struct ContentView: View {
     func executeDelete() {
         print("Now deleting...")
     }
+    
+    func restartGame() {
+        score = 0
+        questionsAsked = 0
+        countries.shuffle()
+        correctAnswer = Int.random(in: 0...2)
+    }
 }
-
+    
 #Preview {
     ContentView()
 }
