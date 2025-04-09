@@ -7,6 +7,21 @@
 
 import SwiftUI
 
+// Create a custom ViewModifier (and accompanying View extension) that makes a view have a large, blue font suitable for prominent titles in a view.
+struct LargeBlue: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.largeTitle)
+            .foregroundStyle(.blue)
+    }
+}
+
+extension View {
+    func largeBlueStyle() -> some View {
+        modifier(LargeBlue())
+    }
+}
+
 struct ContentView: View {
     @State var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
     @State var correctAnswer  = Int.random(in: 0...2)
@@ -17,6 +32,18 @@ struct ContentView: View {
     @State private var questionsAsked: Int = 0
     private var questionLimit: Int = 8
     @State private var showingFinalScore: Bool = false
+    
+    // Go back to project 2 and replace Image view used for flags with the new FlagImage() view that renders one flag
+    // image using the specific set of modifiers we had.
+    struct FlagImage: View {
+        var country: String
+
+        var body: some View {
+            Image(country)
+                .clipShape(.capsule)
+                .shadow(radius: 5)
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -40,14 +67,14 @@ struct ContentView: View {
                             .font(.subheadline.weight(.heavy))
                         
                         Text(countries[correctAnswer])
-                            .font(.largeTitle.weight(.semibold))
+                            .largeBlueStyle()
                     }
                     
                     ForEach(0..<3) { number in
                         Button {
                             flagTapped(number)
                         } label: {
-                            Image(countries[number])
+                            FlagImage(country: countries[number])
                                 .clipShape(.capsule)
                                 .shadow(radius: 5)
                         }
