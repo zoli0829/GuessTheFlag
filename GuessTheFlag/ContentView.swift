@@ -30,8 +30,12 @@ struct ContentView: View {
     @State private var scoreTitle = ""
     @State private var score: Int = 0
     @State private var questionsAsked: Int = 0
+    
     private var questionLimit: Int = 8
     @State private var showingFinalScore: Bool = false
+    
+    @State private var rotationAmounts = [0.0, 0.0, 0.0]
+    @State private var selectedFlag: Int? = nil
     
     // Go back to project 2 and replace Image view used for flags with the new FlagImage() view that renders one flag
     // image using the specific set of modifiers we had.
@@ -72,12 +76,23 @@ struct ContentView: View {
                     
                     ForEach(0..<3) { number in
                         Button {
+                            // anim for the tapped flag
+                            withAnimation(.easeInOut(duration: 1)) {
+                                rotationAmounts[number] += 360
+                                selectedFlag = number
+                            }
                             flagTapped(number)
                         } label: {
                             FlagImage(country: countries[number])
-                                .clipShape(.capsule)
-                                .shadow(radius: 5)
                         }
+                        .rotation3DEffect(
+                            .degrees(rotationAmounts[number]),
+                            axis: (x: 0, y: 1, z: 0)
+                        )
+                        // animations for the other 2 flags
+                        .opacity(selectedFlag == nil || selectedFlag == number ? 1: 0.25)
+                        .scaleEffect(selectedFlag == nil || selectedFlag == number ? 1: 0.75)
+                        .animation(.easeInOut(duration: 0.5), value: selectedFlag)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -133,6 +148,8 @@ struct ContentView: View {
         }
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        rotationAmounts = [0.0, 0.0, 0.0]
+        selectedFlag = nil
     }
     
     func executeDelete() {
@@ -144,6 +161,9 @@ struct ContentView: View {
         questionsAsked = 0
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        rotationAmounts = [0.0, 0.0, 0.0]
+        selectedFlag = nil
+        
     }
 }
     
